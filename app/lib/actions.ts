@@ -3,10 +3,10 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import postgres from 'postgres';
+import { neon } from '@neondatabase/serverless';
 
 // Database configuration
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = neon(process.env.POSTGRES_URL!);
 
 // Schema definitions
 const FormSchema = z.object({
@@ -20,13 +20,20 @@ const FormSchema = z.object({
 const InvoiceSchema = FormSchema.omit({ id: true, date: true });
 
 // Utility functions
-const parseFormData = (formData: FormData) => {
-    const { customerId, amount, status } = InvoiceSchema.parse({
-        customerId: formData.get('customerId'),
-        amount: formData.get('amount'),
-        status: formData.get('status'),
-    });
-    return { customerId, amount: amount * 100, status };
+let parseFormData = (formData: FormData) => {
+    try {
+        let { customerId, amount, status } = InvoiceSchema.parse({
+            customerId: formData.get('customerId'),
+            amount: formData.get('amount'),
+            status: formData.get('status'),
+        });
+        return { customerId, amount: amount * 100, status };
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            console.error('Validation error:', error.errors);
+        }
+        throw error;
+    }
 };
 
 const handleInvoiceRedirect = () => {
@@ -34,9 +41,9 @@ const handleInvoiceRedirect = () => {
     redirect('/dashboard/invoices');
 };
 
-// INVOICE ACTIONS****************************************************
-// These actions are used to create, update, and delete invoices in the database.
+// **************************   INVOICE ACTIONS   **************************
 const InvoiceActions = {
+
     async createInvoice(formData: FormData) {
         const { customerId, amount, status } = parseFormData(formData);
         const date = new Date().toISOString().split('T')[0];
@@ -50,15 +57,48 @@ const InvoiceActions = {
     },
 
     async updateInvoice(id: string, formData: FormData) {
-        const { customerId, amount, status } = parseFormData(formData);
+        try {
+            // Debug log to see form data
+            console.log('Form Data Values:', {
+                customerId: formData.get('customerId'),
+                amount: formData.get('amount'),
+                status: formData.get('status')
+            });
 
-        await sql`
-          UPDATE invoices
-          SET customer_id = ${customerId}, amount = ${amount}, status = ${status}
-          WHERE id = ${id}
-        `;
+            // Validate ID
+            if (!id || typeof id !== 'string') {
+                throw new Error('Valid invoice ID is required');
+            }
 
-        handleInvoiceRedirect();
+            console.log('Updating invoice with ID:', id);
+            console.log('Form data:', formData);
+
+
+            // Parse and validate form data
+            const { customerId, amount, status } = InvoiceSchema.parse({
+                customerId: formData.get('customerId'),
+                amount: formData.get('amount'),
+                status: formData.get('status'),
+            });
+
+            // Convert amount to cents and ensure proper UUID format
+            const amountInCents = amount * 100;
+
+            // Execute update with proper parameter handling
+            await sql`
+                UPDATE invoices
+                SET 
+                    customer_id = ${customerId},
+                    amount = ${amountInCents},
+                    status = ${status}
+                WHERE id = ${id}
+            `;
+
+            handleInvoiceRedirect();
+        } catch (error) {
+            console.error('Error updating invoice:', error);
+            throw error;
+        }
     },
 
     async deleteInvoice(id: string) {

@@ -121,7 +121,7 @@ export async function fetchFilteredInvoices(
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
-      LIMIT ${ITEMS_PER_PAGE} 
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${(currentPage - 1) * ITEMS_PER_PAGE}
     `;
 
     return invoices;
@@ -176,6 +176,22 @@ export async function fetchInvoiceById(id: string) {
     throw new Error('Failed to fetch invoice.');
   }
 }
+
+export async function fetchCustomerById(id: string) {
+  try {
+    const data = await sql<CustomerField[]>`
+    SELECT Customer_id, customers.name
+    FROM invoices
+    JOIN customers ON invoices.Customer_id = Customers.id
+    WHERE invoices.id = ${id}::uuid
+    `; 
+  return data[0];
+} 
+catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customer.');
+    }; 
+  }
 
 export async function fetchCustomers() {
   try {

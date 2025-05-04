@@ -1,51 +1,51 @@
-'use client';
-
-import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+"use client";
+import { useState } from 'react';
+import { CustomerField, InvoiceForm } from "@/app/lib/definitions";
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { Button } from '@/app/ui/button';
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Button } from "@/app/ui/button";
 
-import { updateInvoice } from '@/app/lib/actions';
+import { updateInvoice } from "@/app/lib/actions";
 
 
 export default function EditInvoiceForm({
   invoice,
-  customers,
+  customer,
 }: {
   invoice: InvoiceForm;
-  customers: CustomerField[];
+  customer: CustomerField;
 }) {
-  const updateInvoiceById = updateInvoice.bind(null, invoice.id);
+ 
+  const [loading, setLoading] = useState(false);
+
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
 
   return (
-    <form action={updateInvoiceById} method="POST" className="mt-6">
+    <form action={updateInvoiceWithId}>
+      <div className="mb-6 flex items-center gap-2">
+        <h1 className="text-xl font-semibold">Edit Invoice</h1>
+      </div>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Customer Name */}
+        {/* Customer Name - display only */}
         <div className="mb-4">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
-          </label>
+          <p className="mb-2 block text-sm font-medium">Customer Name</p>
           <div className="relative">
-            <select
+            <input
               id="customer"
               name="customerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              type="hidden"
               defaultValue={invoice.customer_id}
-            >
-              <option value="" disabled>
-                Select a customer
-              </option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
+            />
+
+            <p className="peer block w-full  rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500">
+              {customer.name}
+            </p>
+
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function EditInvoiceForm({
                   name="status"
                   type="radio"
                   value="pending"
-                  defaultChecked={invoice.status === 'pending'}
+                  defaultChecked={invoice.status === "pending"}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -100,7 +100,7 @@ export default function EditInvoiceForm({
                   name="status"
                   type="radio"
                   value="paid"
-                  defaultChecked={invoice.status === 'paid'}
+                  defaultChecked={invoice.status === "paid"}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -121,7 +121,8 @@ export default function EditInvoiceForm({
         >
           Cancel
         </Link>
-        <Button type="submit">Edit Invoice</Button>
+        <Button type="submit" onClick={() => setLoading(true)} disabled={loading}>
+          {loading ? "Loading..." : "Edit Invoice"}</Button>
       </div>
     </form>
   );

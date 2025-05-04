@@ -1,5 +1,10 @@
+'use client';
+import { useState } from 'react';
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+
+import { deleteInvoice } from '@/app/lib/actions';
+import ConfirmModal from './confirmModal';
 
 export function CreateInvoice() {
   return (
@@ -25,12 +30,27 @@ export function UpdateInvoice({ id }: { id: string }) {
 }
 
 export function DeleteInvoice({ id }: { id: string }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+
   return (
     <>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
+      <button 
+        onClick={() => setIsModalOpen(true)}
+        className="rounded-md border p-2 hover:bg-gray-100"
+      >
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />
       </button>
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => {
+          deleteInvoiceWithId();
+          setIsModalOpen(false);
+        }}
+      />
     </>
   );
 }
