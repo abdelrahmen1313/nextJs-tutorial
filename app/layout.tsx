@@ -1,12 +1,24 @@
+"use client"
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
+import { usePathname } from 'next/navigation';
+
+import { ChevronDoubleUpIcon } from "@heroicons/react/24/outline";
+
+
 
 
 export default function RootLayout({children,}: { children: React.ReactNode;})
+
  {
+  const path= usePathname().slice(1);
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <head>
+        <title>{`Acme Inc. | ${path}`}</title>
+    
+      </head>
+      <body className={`${inter.className} antialiased `}>{children}</body>
       </html>
   );
 }

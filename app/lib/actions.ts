@@ -8,6 +8,10 @@ import { neon } from '@neondatabase/serverless';
 // Database configuration
 const sql = neon(process.env.POSTGRES_URL!);
 
+
+
+
+// **************************   INVOICE ACTIONS   **************************
 // Schema definitions
 const FormSchema = z.object({
     id: z.string(),
@@ -41,7 +45,6 @@ const handleInvoiceRedirect = () => {
     redirect('/dashboard/invoices');
 };
 
-// **************************   INVOICE ACTIONS   **************************
 const InvoiceActions = {
 
     async createInvoice(formData: FormData) {
@@ -57,33 +60,19 @@ const InvoiceActions = {
     },
 
     async updateInvoice(id: string, formData: FormData) {
+         // Validate ID
+         if (!id) {
+            throw new Error('Valid invoice ID is required');
+        }
+
+        // Parse and validate form data
+        const { customerId, amount, status } = parseFormData(formData);
+        // Convert amount to cents and ensure proper UUID format
+        const amountInCents = amount * 100;
+      
         try {
-            // Debug log to see form data
-            console.log('Form Data Values:', {
-                customerId: formData.get('customerId'),
-                amount: formData.get('amount'),
-                status: formData.get('status')
-            });
-
-            // Validate ID
-            if (!id || typeof id !== 'string') {
-                throw new Error('Valid invoice ID is required');
-            }
-
-            console.log('Updating invoice with ID:', id);
-            console.log('Form data:', formData);
-
-
-            // Parse and validate form data
-            const { customerId, amount, status } = InvoiceSchema.parse({
-                customerId: formData.get('customerId'),
-                amount: formData.get('amount'),
-                status: formData.get('status'),
-            });
-
-            // Convert amount to cents and ensure proper UUID format
-            const amountInCents = amount * 100;
-
+     
+      
             // Execute update with proper parameter handling
             await sql`
                 UPDATE invoices
