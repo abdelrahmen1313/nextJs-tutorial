@@ -5,6 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { neon } from '@neondatabase/serverless';
 
+// logger
+import { logError } from './logger';
+
 // Database configuration
 const sql = neon(process.env.POSTGRES_URL!);
 
@@ -64,6 +67,9 @@ const InvoiceActions = {
          if (!id) {
             throw new Error('Valid invoice ID is required');
         }
+       
+            logError(Error('testLoggerError'), "CODING EYES NEVER SLEEP -- RECKLESS");
+        
 
         // Parse and validate form data
         const { customerId, amount, status } = parseFormData(formData);
