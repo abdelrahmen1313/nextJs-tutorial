@@ -87,3 +87,12 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+
+export type errorLogData = {
+    name: string;
+    message: string;
+    stack: string;
+    context: string;
+}
+

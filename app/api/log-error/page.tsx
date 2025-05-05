@@ -1,35 +1,31 @@
 "use client";
 import React, { useEffect } from "react";
 
-interface dataProps {
-    name: string;
-    message: string;
-    stack: string;
-    context: string;
-}
+
+import { errorLogData } from "@/app/lib/definitions";
+import { getLogs, postLog } from "@/app/lib/actions";
+
+// this need websockets
 
 
+export default function Page() {
 
-export default async function Page() {
+   /* const InitialData = {
+        name: "INITIAL",
+        message: "INITIALPT",
+        stack: "--XXX--xx",
+        context: "Error logging in",
+    } */
 
-
-
-
-    const [data, setData] = React.useState<dataProps[]>([]);
-    
-
-    const fetchData = async () : Promise<dataProps> => {
-        const response = await fetch('/api/log-error');
-        const data = await response.json();
-        return data;
-    }
-    
+    const [data, setData] = React.useState<errorLogData[]>([]);
 
 
     useEffect(() => {
-        fetchData().then((newData) => setData([...data, newData]));
+        getLogs().then((newData) => setData([...newData]));
    
-    }, [data]);
+    }, []);
+
+
 
     if (!data) {
         return (
@@ -41,18 +37,40 @@ export default async function Page() {
         )
     } 
     return (
-     <div>
-        <h1>Log error page</h1>
-        <ul>
-            {data.map((item: dataProps, index: number) => (
-                <li key={index}>
-                    <p><strong>{item.name}</strong></p>
-                    <p>{item.message}</p>
-                    <p>{item.stack}</p>
-                    <p>{item.context}</p>
-                </li>
+     <div className="flex flex-col">
+        <h1 className="text-2xl">Log error page</h1>
+<table className="min-w-full">   
+    <thead className="bg-gray-50">
+    <tr className="border-b">
+        <th className="px-6 py-4">Name</th>
+        <th className="px-6 py-4">Message</th>
+        <th className="px-6 py-4">Stack</th>
+        <th className="px-6 py-4">Context</th>
+    </tr>
+    </thead>
+    <tbody>
+     {data.map((item: errorLogData, index: number) => (
+                <tr key={index} className="border-b ">
+                    <td className="px-6 py-4">{item.name}</td>
+                    <td className="px-6 py-4">{item.message}</td>
+                    <td className="px-6 py-4">{item.stack}</td>
+                    <td className="px-6 py-4">{item.context}</td>
+                </tr>
             ))}
-        </ul>
+    </tbody>
+        </table>
+
+
+        <button className="btn btn-primary" onClick={() => postLog(
+            {
+                name: "INITIAL",
+                message: "INITIALPT",
+                stack: "--XXX--xx",
+                context: "Error logging in",
+            }
+        )}>POST</button>
+
      </div>
+
     )
 }

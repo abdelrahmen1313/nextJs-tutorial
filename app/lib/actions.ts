@@ -3,13 +3,15 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
+//import { neon } from '@neondatabase/serverless';
+
+import postgres from 'postgres';
 
 // logger
 import { logError } from './logger';
 
 // Database configuration
-const sql = neon(process.env.POSTGRES_URL!);
+const sql = postgres(process.env.POSTGRES_URL!);
 
 
 
@@ -67,9 +69,6 @@ const InvoiceActions = {
          if (!id) {
             throw new Error('Valid invoice ID is required');
         }
-       
-            logError(Error('testLoggerError'), "CODING EYES NEVER SLEEP -- RECKLESS");
-        
 
         // Parse and validate form data
         const { customerId, amount, status } = parseFormData(formData);
@@ -109,3 +108,21 @@ const InvoiceActions = {
 
 export const { createInvoice, updateInvoice, deleteInvoice } = InvoiceActions;
 
+/************** LOGGER **************/
+
+import {errorLogData} from '@/app/lib/definitions';
+
+export async function postLog(logData : errorLogData) { 
+    await sql `
+    INSERT INTO logs (name, message, stack, context)
+    VALUES (${logData.name}, ${logData.message}, ${logData.stack}, ${logData.context})
+    `
+}
+
+export async function getLogs(): Promise<errorLogData[]> {
+    const logs = await sql<errorLogData[]> 
+    `
+    SELECT * FROM logs
+    `
+    return logs
+}
