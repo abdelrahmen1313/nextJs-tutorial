@@ -3,15 +3,16 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-//import { neon } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 
-import postgres from 'postgres';
+//import postgres from 'postgres';
 
 // logger
+// need to be upscaled to match the Error 
 import { logError } from './logger';
 
 // Database configuration
-const sql = postgres(process.env.POSTGRES_URL!);
+const sql = neon(process.env.POSTGRES_URL!);
 
 
 
@@ -112,17 +113,39 @@ export const { createInvoice, updateInvoice, deleteInvoice } = InvoiceActions;
 
 import {errorLogData} from '@/app/lib/definitions';
 
-export async function postLog(logData : errorLogData) { 
-    await sql `
-    INSERT INTO logs (name, message, stack, context)
-    VALUES (${logData.name}, ${logData.message}, ${logData.stack}, ${logData.context})
-    `
+export async function postLog(context: string, error: Error) { 
+    // Convert Error object to a serializable format--
+  
+
+    try {
+        await sql` 
+            INSERT INTO logs (error_data, context)
+            VALUES (${JSON.stringify(error)}::jsonb, ${context})
+        `;
+    } catch (dbError) {
+        console.error('Failed to log error:', dbError);
+        throw dbError;
+    }
 }
 
-export async function getLogs(): Promise<errorLogData[]> {
-    const logs = await sql<errorLogData[]> 
-    `
-    SELECT * FROM logs
-    `
-    return logs
+
+export async function getLogs() : Promise<errorLogData[]> {
+   try {
+    const logs = (await sql
+        `
+         SELECT 
+                   (id,
+                    error_data::jsonb,
+                    context
+                    ) as error_data_log
+                FROM logs
+        `
+        ) as errorLogData[];
+        return logs; 
+
+   } catch (error) {
+        console.error('Error fetching logs:', error);
+        throw error;
+    }
+   
 }

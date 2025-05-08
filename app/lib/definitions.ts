@@ -88,11 +88,29 @@ export type InvoiceForm = {
   status: 'pending' | 'paid';
 };
 
-
+// interface
 export type errorLogData = {
-    name: string;
-    message: string;
-    stack: string;
-    context: string;
-}
+    id: string;
+    error_data: {
+        message: string;
+        name: string;
+        stack?: string;
+        timestamp
+        : string;
+    };
+    //hash?:string;
+    context?: string | null;
+    //created_at?: string | Date;
+};
 
+
+export type errorLog = {
+    id: string;
+    error_data: {
+        message: string;
+        name: string;
+        stack?: string;
+        timestamp: string;
+    };    
+    context?: string | null;
+};

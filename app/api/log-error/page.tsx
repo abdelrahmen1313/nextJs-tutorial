@@ -1,76 +1,98 @@
 "use client";
-import React, { useEffect } from "react";
-
+import React, { useEffect, useState } from "react";
 
 import { errorLogData } from "@/app/lib/definitions";
 import { getLogs, postLog } from "@/app/lib/actions";
 
-// this need websockets
 
+import clsx from "clsx";
 
 export default function Page() {
-
-   /* const InitialData = {
-        name: "INITIAL",
-        message: "INITIALPT",
-        stack: "--XXX--xx",
-        context: "Error logging in",
-    } */
-
     const [data, setData] = React.useState<errorLogData[]>([]);
+    const [currentTask, setCurrentTask] = useState<errorLogData | null>(null);
 
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        getLogs().then((newData) => setData([...newData]));
-   
+        const interval = setInterval(() => {
+            const fetchData = async () => {
+                const logs = await getLogs()
+                setData(logs);
+                setIsLoading(false);
+            };
+            fetchData();
+        }, 5000); // Fetch every 5 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
     }, []);
 
-
-
-    if (!data) {
-        return (
-            <div>
-                <h1>Log error page</h1>
-                <p>No data to display</p>
-
-            </div>
-        )
-    } 
     return (
-     <div className="flex flex-col">
-        <h1 className="text-2xl">Log error page</h1>
-<table className="min-w-full">   
-    <thead className="bg-gray-50">
-    <tr className="border-b">
-        <th className="px-6 py-4">Name</th>
-        <th className="px-6 py-4">Message</th>
-        <th className="px-6 py-4">Stack</th>
-        <th className="px-6 py-4">Context</th>
-    </tr>
-    </thead>
-    <tbody>
-     {data.map((item: errorLogData, index: number) => (
-                <tr key={index} className="border-b ">
-                    <td className="px-6 py-4">{item.name}</td>
-                    <td className="px-6 py-4">{item.message}</td>
-                    <td className="px-6 py-4">{item.stack}</td>
-                    <td className="px-6 py-4">{item.context}</td>
-                </tr>
-            ))}
-    </tbody>
-        </table>
 
+    
 
-        <button className="btn btn-primary" onClick={() => postLog(
-            {
-                name: "INITIAL",
-                message: "INITIALPT",
-                stack: "--XXX--xx",
-                context: "Error logging in",
-            }
-        )}>POST</button>
+      <div className="flex flex-col p-4 space-y-4">
 
-     </div>
+            
+            <h1 className="text-2xl font-bold">Log error page</h1>
 
+       <section className="flex flex-col space-y-2">
+        <h2 className="text-lg font-semibold">Current Issues</h2>
+
+            <div className="flex flex-col space-y-2">
+             {isLoading ? (<p>Loading...</p>) : 
+            <ul>
+            {data.map((log : errorLogData) => 
+            
+                <li
+                    key={log.id}
+                    className= "flex-col space-y-2 rounded-md bg-gray-50 p-4">
+                           {log.id}
+                    </li>
+                    
+                    )
+                }
+    
+            </ul> } 
+            </div>
+            
+            </section>
+
+            <section>
+                { currentTask && (
+                    <div>
+                    <h2 className="text-lg font-semibold">Current Task</h2>
+                    <p>{currentTask?.id}</p>
+                    </div>
+                )}
+                
+               
+            </section>
+          
+
+          <button 
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={() => postLog(
+                    "general test",
+
+                    {
+                        name: "error.code",
+                        message: "This is a test error message",
+                        stack: "error.printStackTrace(this.error)",
+                    }
+                )}
+            >
+                POST TEST ERROR
+            </button>
+
+        </div>    
     )
+
+
+       
+
+
+    
 }
+
+// FUTURE > IMPLEMENT PATH MATCHING FOR GITHUB REPO
+// CURRENT -> SET DEV TO SELECT A CURRENT ISSUE TO FIX, A BUTTON TO PULL REQUEST (create new branch..)

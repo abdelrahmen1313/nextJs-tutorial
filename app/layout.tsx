@@ -3,10 +3,6 @@ import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { usePathname } from 'next/navigation';
 
-import { ChevronDoubleUpIcon } from "@heroicons/react/24/outline";
-
-
-
 
 export default function RootLayout({children,}: { children: React.ReactNode;})
 

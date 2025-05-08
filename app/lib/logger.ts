@@ -4,17 +4,17 @@ import { errorLogData } from "./definitions";
 // lib/logger.ts
 export const logError = (logData: errorLogData)  => {
     if (process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_STAGE === "staging") {
-      console.error(`[${logData.context || "error"}]`, logData.message);
-      postLog(logData);
+      console.error(`[${logData.context || "error"}]`, JSON.stringify(logData.error_data, null, 2));
+     
+    
       
     } else {
       // Example: send error to external logging service
-      postLog(logData);
+     //postLog(logData);
     }
   };
   
  /* function sendToLogService(error: Error, context?: string) {
-    // Use services like Sentry, LogRocket, Datadog, or a custom webhook
     fetch("/api/log-error", {
       method: "POST",
       body: JSON.stringify({
@@ -27,4 +27,4 @@ export const logError = (logData: errorLogData)  => {
   } */
 
   
-  // upscaling -> override nextjs error handler -> creating contextual error classes
+  // this is normally handled by nextjs, we could use dev mode to debug logged errors
