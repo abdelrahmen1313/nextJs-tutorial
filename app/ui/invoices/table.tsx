@@ -19,7 +19,7 @@ export default async function InvoicesTable({
 
   return (
     <>
-      <div className="mt-6 flow-root">
+      <div className="mt-6 flow-root bg-white  dark:bg-gray-800 shadow-sm">
         <div className="inline-block min-w-full align-middle">
           <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
             {/* Small Screens  */}

@@ -2,14 +2,13 @@
 import React, { useEffect, useState } from "react";
 
 import { errorLogData } from "@/app/lib/definitions";
-import { getLogs, postLog } from "@/app/lib/actions";
+import { getLogs } from "@/app/lib/actions";
 
 
-import clsx from "clsx";
 
 export default function Page() {
     const [data, setData] = React.useState<errorLogData[]>([]);
-    const [currentTask, setCurrentTask] = useState<errorLogData | null>(null);
+   // const [currentTask, setCurrentTask] = useState<errorLogData | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
 
@@ -28,25 +27,19 @@ export default function Page() {
 
     return (
 
-    
-
       <div className="flex flex-col p-4 space-y-4">
-
-            
             <h1 className="text-2xl font-bold">Log error page</h1>
-
        <section className="flex flex-col space-y-2">
         <h2 className="text-lg font-semibold">Current Issues</h2>
-
             <div className="flex flex-col space-y-2">
              {isLoading ? (<p>Loading...</p>) : 
             <ul>
             {data.map((log : errorLogData) => 
-            
+
                 <li
                     key={log.id}
                     className= "flex-col space-y-2 rounded-md bg-gray-50 p-4">
-                           {log.id}
+                           {log.id} - {log.context} - {log.error_data.message}
                     </li>
                     
                     )
@@ -57,19 +50,10 @@ export default function Page() {
             
             </section>
 
-            <section>
-                { currentTask && (
-                    <div>
-                    <h2 className="text-lg font-semibold">Current Task</h2>
-                    <p>{currentTask?.id}</p>
-                    </div>
-                )}
-                
-               
-            </section>
-          
+            
 
-          <button 
+         {/* 
+         <button 
                 className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 onClick={() => postLog(
                     "general test",
@@ -83,7 +67,9 @@ export default function Page() {
             >
                 POST TEST ERROR
             </button>
-
+*/}
+         
+          
         </div>    
     )
 

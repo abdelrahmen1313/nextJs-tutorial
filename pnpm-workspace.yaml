@@ -1,5 +1,6 @@
 ignoredBuiltDependencies:
   - '@heroui/shared-utils'
   - sharp
+  - unrs-resolver
 onlyBuiltDependencies:
   - bcrypt

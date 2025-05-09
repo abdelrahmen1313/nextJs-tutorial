@@ -7,10 +7,6 @@ import { neon } from '@neondatabase/serverless';
 
 //import postgres from 'postgres';
 
-// logger
-// need to be upscaled to match the Error 
-import { logError } from './logger';
-
 // Database configuration
 const sql = neon(process.env.POSTGRES_URL!);
 
@@ -21,23 +17,31 @@ const sql = neon(process.env.POSTGRES_URL!);
 // Schema definitions
 const FormSchema = z.object({
     id: z.string(),
-    customerId: z.string(),
-    amount: z.coerce.number(),
-    status: z.enum(['pending', 'paid']),
+    customerId: z.string({
+        invalid_type_error: 'Please select a customer.',
+    }),
+    amount: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than $0.' }),
+    status: z.enum(['pending', 'paid'], {
+        invalid_type_error: 'Please select an invoice status.',
+    }),
     date: z.string(),
 });
 
 const InvoiceSchema = FormSchema.omit({ id: true, date: true });
 
+
+
 // Utility functions
-let parseFormData = (formData: FormData) => {
+const parseFormData = (formData: FormData) => {
     try {
-        let { customerId, amount, status } = InvoiceSchema.parse({
+        const { customerId, amount, status } = InvoiceSchema.parse({
             customerId: formData.get('customerId'),
             amount: formData.get('amount'),
             status: formData.get('status'),
         });
-        return { customerId, amount: amount * 100, status };
+        return { customerId, amount, status };
     } catch (error) {
         if (error instanceof z.ZodError) {
             console.error('Validation error:', error.errors);
@@ -54,46 +58,49 @@ const handleInvoiceRedirect = () => {
 const InvoiceActions = {
 
     async createInvoice(formData: FormData) {
+
         const { customerId, amount, status } = parseFormData(formData);
+
+        // const amountInCents = amount * 100;
         const date = new Date().toISOString().split('T')[0];
 
-        await sql`
-          INSERT INTO invoices (customer_id, amount, status, date)
-          VALUES (${customerId}, ${amount}, ${status}, ${date})
-        `;
+
+        try {
+            await sql`
+            INSERT INTO invoices (customer_id, amount, status, date)
+            VALUES (${customerId}, ${amount * 100}, 
+            ${status}, ${date})
+          `;
+        } catch (error) {
+            console.error('DBError @ creating invoice:', error);
+            throw error;
+        }
+
 
         handleInvoiceRedirect();
     },
 
     async updateInvoice(id: string, formData: FormData) {
-         // Validate ID
-         if (!id) {
+        // Validate ID
+        if (!id) {
             throw new Error('Valid invoice ID is required');
         }
 
         // Parse and validate form data
         const { customerId, amount, status } = parseFormData(formData);
-        // Convert amount to cents and ensure proper UUID format
         const amountInCents = amount * 100;
-      
-        try {
-     
-      
-            // Execute update with proper parameter handling
-            await sql`
-                UPDATE invoices
-                SET 
-                    customer_id = ${customerId},
-                    amount = ${amountInCents},
-                    status = ${status}
-                WHERE id = ${id}
-            `;
 
-            handleInvoiceRedirect();
-        } catch (error) {
-            console.error('Error updating invoice:', error);
-            throw error;
-        }
+        await sql`
+                UPDATE invoices
+                SET customer_id = ${customerId},
+                 amount = ${amountInCents},
+                  status = ${status}
+               
+                WHERE id = ${id}
+            `
+
+        handleInvoiceRedirect();
+
     },
 
     async deleteInvoice(id: string) {
@@ -111,11 +118,11 @@ export const { createInvoice, updateInvoice, deleteInvoice } = InvoiceActions;
 
 /************** LOGGER **************/
 
-import {errorLogData} from '@/app/lib/definitions';
+import { errorLogData } from '@/app/lib/definitions';
 
-export async function postLog(context: string, error: Error) { 
+export async function postLog(context: string, error: Error) {
     // Convert Error object to a serializable format--
-  
+
 
     try {
         await sql` 
@@ -129,10 +136,10 @@ export async function postLog(context: string, error: Error) {
 }
 
 
-export async function getLogs() : Promise<errorLogData[]> {
-   try {
-    const logs = (await sql
-        `
+export async function getLogs(): Promise<errorLogData[]> {
+    try {
+        const logs = (await sql
+            `
          SELECT 
                    (id,
                     error_data::jsonb,
@@ -141,11 +148,39 @@ export async function getLogs() : Promise<errorLogData[]> {
                 FROM logs
         `
         ) as errorLogData[];
-        return logs; 
+        return logs;
 
-   } catch (error) {
+    } catch (error) {
         console.error('Error fetching logs:', error);
         throw error;
     }
-   
+
 }
+
+/************** AUTH ************** */
+
+import { signIn } from '../auth';
+import { AuthError } from 'next-auth';
+
+
+ 
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+        
+      return error.message;
+    } else {
+        console.error('Error authenticating:', error);
+        throw error;
+      
+      }
+    }
+ 
+  }
+
+

@@ -18,8 +18,7 @@ export default async function Page(
     fetchInvoiceById(id),
     fetchCustomerById(id)
   ]);
-  console.log('Invoice:', invoice);
-  console.log('Customer:', customer);
+  
 
   if (!invoice) {
     notFound();

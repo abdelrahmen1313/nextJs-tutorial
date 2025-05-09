@@ -1,5 +1,4 @@
 "use client";
-import { useState } from 'react';
 import { CustomerField, InvoiceForm } from "@/app/lib/definitions";
 import {
   CheckIcon,
@@ -21,12 +20,12 @@ export default function EditInvoiceForm({
   customer: CustomerField;
 }) {
  
-  const [loading, setLoading] = useState(false);
 
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
 
+
   return (
-    <form action={updateInvoiceWithId}>
+    <form action={updateInvoiceWithId} >
       <div className="mb-6 flex items-center gap-2">
         <h1 className="text-xl font-semibold">Edit Invoice</h1>
       </div>
@@ -40,6 +39,7 @@ export default function EditInvoiceForm({
               name="customerId"
               type="hidden"
               defaultValue={invoice.customer_id}
+
             />
 
             <p className="peer block w-full  rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500">
@@ -58,6 +58,7 @@ export default function EditInvoiceForm({
           <div className="relative mt-2 rounded-md">
             <div className="relative">
               <input
+                required
                 id="amount"
                 name="amount"
                 type="number"
@@ -85,6 +86,7 @@ export default function EditInvoiceForm({
                   type="radio"
                   value="pending"
                   defaultChecked={invoice.status === "pending"}
+                  required
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -121,8 +123,9 @@ export default function EditInvoiceForm({
         >
           Cancel
         </Link>
-        <Button type="submit" onClick={() => setLoading(true)} disabled={loading}>
-          {loading ? "Loading..." : "Edit Invoice"}</Button>
+        <Button type="submit" 
+         className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+        Save</Button>
       </div>
     </form>
   );
