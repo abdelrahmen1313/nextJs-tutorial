@@ -104,7 +104,7 @@ export type errorLogData = {
 };
 
 
-export type errorLog = {
+/*export type errorLog = {
     id: string;
     error_data: {
         message: string;
@@ -114,3 +114,4 @@ export type errorLog = {
     };    
     context?: string | null;
 };
+*/

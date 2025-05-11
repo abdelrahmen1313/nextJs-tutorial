@@ -1,8 +1,16 @@
 import React from 'react'
 
-const Customers = () => {
+import CustomersTable from '@/app/ui/customers/table';
+import { fetchAllCustomersWithConstraints } from '@/app/lib/data';
+
+const Customers = async() => {
+  const customers = await  fetchAllCustomersWithConstraints();
+  console.log(customers)
+ 
   return (
-    <div>Customers Page</div>
+    <div>
+      <CustomersTable customers={customers} />
+    </div>
   )
 }
 
