@@ -210,7 +210,8 @@ export async function fetchCustomers() {
   }
 }
 
-export async function fetchFilteredCustomers(query: string) {
+export async function fetchFilteredCustomers(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<CustomersTableType[]>`
 		SELECT
@@ -228,6 +229,7 @@ export async function fetchFilteredCustomers(query: string) {
         customers.email ILIKE ${`%${query}%`}
 		GROUP BY customers.id, customers.name, customers.email, customers.image_url
 		ORDER BY customers.name ASC
+    LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
 	  `;
 
     const customers = data.map((customer) => ({
@@ -243,6 +245,22 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
+export async function fetchCustomersPages(query: string) {
+  try {
+    const data = await sql`SELECT COUNT(*)
+    FROM customers
+    WHERE
+      customers.name ILIKE ${`%${query}%`} OR
+      customers.email ILIKE ${`%${query}%`}
+    `;
+
+    const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of customers.');
+  }
+}
 
 /***************** LOGIN ********/
 import type { User } from '@/app/lib/definitions';
@@ -262,7 +280,10 @@ export async function getUser(email: string): Promise<User | undefined> {
 
 import type { FormattedCustomersTable } from '@/app/lib/definitions';
 
-export async function fetchAllCustomersWithConstraints(): Promise<FormattedCustomersTable[]> {
+export async function fetchAllCustomersWithConstraints(
+  currentPage: number,
+): Promise<FormattedCustomersTable[]> {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const customers = await sql<CustomersTableType[]>
       `SELECT
@@ -276,7 +297,10 @@ export async function fetchAllCustomersWithConstraints(): Promise<FormattedCusto
       FROM customers
       LEFT JOIN invoices ON customers.id = invoices.customer_id
       GROUP BY customers.id, customers.name, customers.email, customers.image_url
-      ORDER BY customers.name ASC`;
+      ORDER BY customers.name ASC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+`;
+      
       const formattedCustomers = customers.map((customer) => ({
     ...customer,
     total_pending: formatCurrency(customer.total_pending),
