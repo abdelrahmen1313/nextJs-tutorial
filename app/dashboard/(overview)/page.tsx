@@ -10,6 +10,7 @@ import { lusitana } from '../../ui/fonts';
 import { Suspense } from 'react';
 // skeletons
 import { RevenueChartSkeleton , InvoiceSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
+import Link from 'next/link';
 
 
 
@@ -28,7 +29,9 @@ export default async function Page() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
       <Suspense fallback={<RevenueChartSkeleton />}>
+      <Link href={'/dashboard/revenue'} className="col-span-1 lg:col-span-4">
           <RevenueChart />
+        </Link>
         </Suspense>
         <Suspense fallback={<InvoiceSkeleton />}>
          <LatestInvoices  /> 

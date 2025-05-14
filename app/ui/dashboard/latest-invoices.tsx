@@ -11,7 +11,7 @@ export default async function LatestInvoices() {
     return <p className="mt-4 text-gray-400">No data available.</p>;
   }
   return (
-    <div className="flex w-full flex-col md:col-span-4">
+    <div className="flex w-full flex-col md:col-span-4 border-2 border-gray-200 shadow-sm">
    
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
       <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>

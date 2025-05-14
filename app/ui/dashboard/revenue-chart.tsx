@@ -30,7 +30,7 @@ export default async function RevenueChart() {
         </p>
       </div> */} 
       
-       <div className="rounded-xl bg-gray-50 p-4">
+       <div className=" bg-gray-50 p-4 border-2 border-gray-200 shadow-sm">
        <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
         Recent Revenue
       </h2>

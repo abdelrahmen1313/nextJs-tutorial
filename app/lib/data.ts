@@ -34,6 +34,27 @@ export async function fetchRevenue() {
   }
 }
 
+export async function fetchPaidRevenue() {
+  try {
+    const data = await sql`
+      SELECT
+        EXTRACT(MONTH FROM date) AS month,
+        SUM(amount) AS revenue
+      FROM invoices
+      WHERE status = 'paid'
+      GROUP BY month
+      ORDER BY month ASC
+    `;
+
+    return data;
+   
+  }
+  catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue chart data.');
+  }
+}
+
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw[]>`
