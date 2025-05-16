@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { time } from 'console';
 
 const sql = neon(`${process.env.POSTGRES_URL}`);
 
@@ -9,16 +10,18 @@ const sql = neon(`${process.env.POSTGRES_URL}`);
     SELECT invoices.amount, customers.name
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
-    WHERE invoices.amount = 666;
+    
   `;
 
-	return data;
+	return {...data, timestamp: new Date().toISOString()};
  }
 
 export async function GET() {
  
    try {
-   	return Response.json(await listInvoices());
+   	let resp = Response.json(await listInvoices());
+    
+    return resp;
    } catch (error) {
    	return Response.json({ error }, { status: 500 });
    }
