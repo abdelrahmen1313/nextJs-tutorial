@@ -1,5 +1,7 @@
 "use client";
+import { use, useEffect, useState } from "react";
 
+import { fetchPaidRevenue } from "@/app/lib/data";
 import {
   LineChart,
   Line,
@@ -8,9 +10,12 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-
+  AreaChart,
+  Area,
+  ReferenceLine,
 } from "recharts";
 
+import dynamic from "next/dynamic";
 
 const data = [
   { month: "Jan", revenue: 2000 },
@@ -18,7 +23,7 @@ const data = [
   { month: "Mar", revenue: 2200 },
   { month: "Apr", revenue: 2500 },
   { month: "May", revenue: 2300 },
-  { month: "Jun", revenue: 6000 },
+  { month: "Jun", revenue: 3200 },
   { month: "Jul", revenue: 3500 },
   { month: "Aug", revenue: 3700 },
   { month: "Sep", revenue: 2500 },
@@ -41,7 +46,7 @@ export default function Page() {
             <CartesianGrid stroke="#ccc" strokeDasharray="8 8" vertical={false} 
            />
             <XAxis dataKey="month" />
-            <YAxis tickCount={6}  />
+            <YAxis />
             <Tooltip />
           </LineChart>
           </ResponsiveContainer>
